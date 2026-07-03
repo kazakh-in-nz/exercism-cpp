@@ -47,3 +47,6 @@ lasagna-master/lasagna-master
 *.swp
 *~
 .vscode/*.log
+
+# Local mise overrides (e.g. personal git email)
+mise.local.toml
