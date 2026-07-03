@@ -1,0 +1,49 @@
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Ninja
+build.ninja
+.ninja_deps
+.ninja_log
+
+# Build output
+build/
+out/
+*.o
+*.obj
+*.d
+*.exe
+*.out
+*.app
+
+# Exercise executables (cmake output, same name as the exercise folder)
+lasagna/lasagna
+pacman-rules/pacman-rules
+freelancer-rates/freelancer-rates
+last-will/last-will
+vehicle-purchase/vehicle-purchase
+making-the-grade/making-the-grade
+interest-is-interesting/interest-is-interesting
+ellens-alien-game/ellens-alien-game
+election-day/election-day
+troll-the-trolls/troll-the-trolls
+doctor-data/doctor-data
+lasagna-master/lasagna-master
+
+# Exercism local metadata (contains your handle and exercise UUIDs)
+**/.exercism/metadata.json
+
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+*.swp
+*~
+.vscode/*.log

@@ -1,0 +1,110 @@
+# Exercism C++ track — run, test, and submit exercises via mise.
+#
+# First-time setup:
+#   mise trust          # trust this config (once)
+#   mise install        # install cmake, ninja
+#
+# Common usage:
+#   mise run test              # test default exercise (EXERCISE in [env])
+#   mise run test bob          # test a specific exercise
+#   mise run submit            # submit default exercise
+#   mise run download bob      # download a new exercise
+#   EXERCISE=lasagna mise run test
+
+[tools]
+cmake = "4.3"
+ninja = "1.13"
+
+[env]
+EXERCISE = "lasagna"
+CMAKE_GENERATOR = "Unix Makefiles"
+
+[tasks.ls]
+description = "List exercise directories in this workspace"
+run = '''
+for dir in */; do
+  name="${dir%/}"
+  if [ -f "$name/CMakeLists.txt" ] && [ -d "$name/.exercism" ]; then
+    echo "$name"
+  fi
+done
+'''
+
+[tasks.prepare]
+description = "Create empty implementation files if missing (required by some exercises)"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+run = '''
+exercise="${usage_exercise?}"
+file="${exercise//-/_}"
+cd "{{config_root}}/${exercise}"
+touch "${file}.h" "${file}.cpp" 2>/dev/null || true
+'''
+
+[tasks.download]
+description = "Download (or refresh) an exercise from Exercism"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+run = 'exercism download --track cpp --exercise "${usage_exercise?}"'
+
+[tasks.configure]
+description = "Configure CMake for an exercise (first-time setup)"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+depends = ["prepare {{usage.exercise}}"]
+run = '''
+cd "{{config_root}}/${usage_exercise?}"
+cmake -G "${CMAKE_GENERATOR?}" .
+'''
+
+[tasks.build]
+description = "Build an exercise"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+depends = ["configure {{usage.exercise}}"]
+run = '''
+cd "{{config_root}}/${usage_exercise?}"
+cmake --build . --parallel
+'''
+
+[tasks.test]
+description = "Run tests for an exercise (via exercism CLI)"
+alias = "t"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+depends = ["configure {{usage.exercise}}"]
+run = '''
+cd "{{config_root}}/${usage_exercise?}"
+exercism test
+'''
+
+[tasks."test-all"]
+description = "Run tests with EXERCISM_RUN_ALL_TESTS enabled"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+depends = ["prepare"]
+run = '''
+exercise="${usage_exercise?}"
+cd "{{config_root}}/${exercise}"
+cmake -G "${CMAKE_GENERATOR?}" . -DEXERCISM_RUN_ALL_TESTS=ON
+cmake --build . --parallel
+"./${exercise}"
+'''
+
+[tasks.submit]
+description = "Submit solution files for an exercise"
+alias = "s"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+run = '''
+cd "{{config_root}}/${usage_exercise?}"
+exercism submit
+'''
+
+[tasks.clean]
+description = "Remove build artifacts for an exercise"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+run = '''
+exercise="${usage_exercise?}"
+cd "{{config_root}}/${exercise}"
+rm -rf CMakeCache.txt CMakeFiles cmake_install.cmake Makefile compile_commands.json
+rm -f "${exercise}" "${exercise}.exe"
+'''
+
+[tasks.open]
+description = "Open exercise README in your default browser"
+usage = 'arg "[exercise]" help="Exercise slug (e.g. lasagna, bob)" default="lasagna" env="EXERCISE"'
+run = 'open "{{config_root}}/${usage_exercise?}/README.md"'
